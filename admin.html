@@ -2,12 +2,16 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
     <title>FoodieBot Admin</title>
 
     <style>
+
         body {
             margin: 0;
             font-family: Arial, sans-serif;
@@ -88,14 +92,33 @@
             font-weight: bold;
         }
 
+        .status-select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 8px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 15px;
+            box-sizing: border-box;
+        }
+
+        .status-message {
+            margin-top: 8px;
+            font-weight: bold;
+        }
+
         .logout {
             background: #555;
             margin-left: 10px;
         }
+
     </style>
+
 </head>
 
+
 <body>
+
 
 <header>
 
@@ -162,6 +185,7 @@
 
     </div>
 
+
 </div>
 
 
@@ -183,9 +207,7 @@ async function login() {
 
     const password =
         document
-            .getElementById(
-                "adminPassword"
-            )
+            .getElementById("adminPassword")
             .value
             .trim();
 
@@ -193,9 +215,7 @@ async function login() {
     if (password === "") {
 
         document
-            .getElementById(
-                "loginError"
-            )
+            .getElementById("loginError")
             .innerText =
                 "Please enter your password.";
 
@@ -215,25 +235,19 @@ async function login() {
     if (success) {
 
         document
-            .getElementById(
-                "loginBox"
-            )
+            .getElementById("loginBox")
             .classList
             .add("hidden");
 
 
         document
-            .getElementById(
-                "ordersBox"
-            )
+            .getElementById("ordersBox")
             .classList
             .remove("hidden");
 
 
         document
-            .getElementById(
-                "adminPassword"
-            )
+            .getElementById("adminPassword")
             .value = "";
 
 
@@ -284,9 +298,7 @@ async function checkAdmin() {
         ) {
 
             document
-                .getElementById(
-                    "loginError"
-                )
+                .getElementById("loginError")
                 .innerText =
                     "❌ Incorrect admin password.";
 
@@ -300,9 +312,7 @@ async function checkAdmin() {
         if (!response.ok) {
 
             document
-                .getElementById(
-                    "loginError"
-                )
+                .getElementById("loginError")
                 .innerText =
                     "❌ Unable to connect to server.";
 
@@ -317,14 +327,13 @@ async function checkAdmin() {
 
     }
 
+
     catch (error) {
 
         console.error(error);
 
         document
-            .getElementById(
-                "loginError"
-            )
+            .getElementById("loginError")
             .innerText =
                 "❌ Server connection failed.";
 
@@ -345,9 +354,7 @@ async function loadOrders() {
 
     const ordersDiv =
         document
-            .getElementById(
-                "orders"
-            );
+            .getElementById("orders");
 
 
     ordersDiv.innerHTML =
@@ -495,10 +502,87 @@ async function loadOrders() {
                         ₹${order.Total}
                     </p>
 
+
                     <p class="status">
+
                         🚚 <b>Status:</b>
-                        ${order.OrderStatus}
+
+                        <span
+                            id="status-${order.OrderID}"
+                        >
+                            ${order.OrderStatus}
+                        </span>
+
                     </p>
+
+
+                    <label>
+
+                        <b>
+                            Change Order Status:
+                        </b>
+
+                    </label>
+
+
+                    <select
+                        class="status-select"
+
+                        onchange="
+                            updateOrderStatus(
+                                '${order.OrderID}',
+                                this.value,
+                                this
+                            )
+                        "
+                    >
+
+                        <option
+                            value="Preparing"
+                            ${order.OrderStatus === "Preparing"
+                                ? "selected"
+                                : ""}
+                        >
+                            🟠 Preparing
+                        </option>
+
+
+                        <option
+                            value="Confirmed"
+                            ${order.OrderStatus === "Confirmed"
+                                ? "selected"
+                                : ""}
+                        >
+                            🔵 Confirmed
+                        </option>
+
+
+                        <option
+                            value="Out for Delivery"
+                            ${order.OrderStatus === "Out for Delivery"
+                                ? "selected"
+                                : ""}
+                        >
+                            🟣 Out for Delivery
+                        </option>
+
+
+                        <option
+                            value="Delivered"
+                            ${order.OrderStatus === "Delivered"
+                                ? "selected"
+                                : ""}
+                        >
+                            🟢 Delivered
+                        </option>
+
+                    </select>
+
+
+                    <div
+                        class="status-message"
+                        id="message-${order.OrderID}"
+                    ></div>
 
                 `;
 
@@ -512,12 +596,150 @@ async function loadOrders() {
 
     }
 
+
     catch (error) {
 
         console.error(error);
 
         ordersDiv.innerHTML =
             "<p class='error'>❌ Unable to load orders.</p>";
+
+    }
+
+}
+
+
+// =====================================================
+// UPDATE ORDER STATUS
+// =====================================================
+
+async function updateOrderStatus(
+    orderId,
+    newStatus,
+    selectElement
+) {
+
+    const messageDiv =
+        document.getElementById(
+            "message-" + orderId
+        );
+
+
+    const statusSpan =
+        document.getElementById(
+            "status-" + orderId
+        );
+
+
+    const oldStatus =
+        statusSpan.innerText.trim();
+
+
+    messageDiv.innerText =
+        "⏳ Updating...";
+
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL,
+                {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify({
+
+                            command:
+                                "update order status",
+
+                            adminKey:
+                                adminPassword,
+
+                            orderId:
+                                orderId,
+
+                            status:
+                                newStatus
+
+                        })
+
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        let result =
+            data;
+
+
+        if (data.body) {
+
+            try {
+
+                result =
+                    JSON.parse(
+                        data.body
+                    );
+
+            }
+
+            catch (e) {
+
+                console.error(
+                    "Response parsing error:",
+                    e
+                );
+
+            }
+
+        }
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                result.message ||
+                "Unable to update status"
+            );
+
+        }
+
+
+        statusSpan.innerText =
+            newStatus;
+
+
+        messageDiv.innerText =
+            "✅ Status updated to " +
+            newStatus;
+
+    }
+
+
+    catch (error) {
+
+        console.error(
+            "Status update error:",
+            error
+        );
+
+
+        selectElement.value =
+            oldStatus;
+
+
+        messageDiv.innerText =
+            "❌ " + error.message;
 
     }
 
@@ -535,25 +757,19 @@ function logout() {
 
 
     document
-        .getElementById(
-            "ordersBox"
-        )
+        .getElementById("ordersBox")
         .classList
         .add("hidden");
 
 
     document
-        .getElementById(
-            "loginBox"
-        )
+        .getElementById("loginBox")
         .classList
         .remove("hidden");
 
 
     document
-        .getElementById(
-            "orders"
-        )
+        .getElementById("orders")
         .innerHTML =
             "No orders loaded.";
 
@@ -561,6 +777,7 @@ function logout() {
 
 
 </script>
+
 
 </body>
 
