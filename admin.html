@@ -2,7 +2,6 @@
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
 
     <meta name="viewport"
@@ -105,6 +104,16 @@
         .status-message {
             margin-top: 8px;
             font-weight: bold;
+        }
+
+        .delete-button {
+            background: #d32f2f;
+            margin-top: 12px;
+            width: 100%;
+        }
+
+        .delete-button:hover {
+            background: #b71c1c;
         }
 
         .logout {
@@ -584,6 +593,18 @@ async function loadOrders() {
                         id="message-${order.OrderID}"
                     ></div>
 
+
+                    <button
+                        class="delete-button"
+                        onclick="
+                            deleteOrder(
+                                '${order.OrderID}'
+                            )
+                        "
+                    >
+                        🗑️ Delete Order
+                    </button>
+
                 `;
 
 
@@ -740,6 +761,130 @@ async function updateOrderStatus(
 
         messageDiv.innerText =
             "❌ " + error.message;
+
+    }
+
+}
+
+
+// =====================================================
+// DELETE ORDER
+// =====================================================
+
+async function deleteOrder(orderId) {
+
+    const confirmed =
+        confirm(
+            "⚠️ Are you sure you want to delete Order " +
+            orderId +
+            "?\n\nThis action cannot be undone."
+        );
+
+
+    if (!confirmed) {
+
+        return;
+
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL,
+                {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify({
+
+                            command:
+                                "delete order",
+
+                            adminKey:
+                                adminPassword,
+
+                            orderId:
+                                orderId
+
+                        })
+
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        let result =
+            data;
+
+
+        if (data.body) {
+
+            try {
+
+                result =
+                    JSON.parse(
+                        data.body
+                    );
+
+            }
+
+            catch (e) {
+
+                console.error(
+                    "Response parsing error:",
+                    e
+                );
+
+            }
+
+        }
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                result.message ||
+                "Unable to delete order"
+            );
+
+        }
+
+
+        alert(
+            "✅ Order " +
+            orderId +
+            " deleted successfully."
+        );
+
+
+        loadOrders();
+
+    }
+
+
+    catch (error) {
+
+        console.error(
+            "Delete order error:",
+            error
+        );
+
+
+        alert(
+            "❌ " +
+            error.message
+        );
 
     }
 
