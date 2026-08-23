@@ -1,49 +1,860 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FoodieBot - Food Ordering</title>
-    <link rel="stylesheet" href="style.css">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <meta name="theme-color"
+          content="#ff6b35">
+
+    <meta name="description"
+          content="FoodieBot - Food Ordering Chatbot">
+
+    <link rel="manifest" href="manifest.json">
+
+    <title>FoodieBot</title>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+        }
+
+        .app {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* HEADER */
+
+        .header {
+            height: 65px;
+            min-height: 65px;
+
+            background: linear-gradient(
+                135deg,
+                #ff5722,
+                #ff8a3d
+            );
+
+            color: white;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 24px;
+            font-weight: bold;
+
+            box-shadow:
+                0 2px 8px rgba(0,0,0,0.15);
+        }
+
+
+        /* CHAT AREA */
+
+        .chat {
+            flex: 1;
+
+            overflow-y: auto;
+
+            padding: 15px;
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 12px;
+        }
+
+
+        /* MESSAGE */
+
+        .message {
+            max-width: 85%;
+
+            padding: 12px 15px;
+
+            border-radius: 16px;
+
+            font-size: 16px;
+
+            line-height: 1.5;
+
+            word-wrap: break-word;
+        }
+
+
+        /* BOT */
+
+        .bot {
+            align-self: flex-start;
+
+            background: white;
+
+            color: #222;
+
+            border-bottom-left-radius: 4px;
+
+            box-shadow:
+                0 2px 6px rgba(0,0,0,0.08);
+        }
+
+
+        /* USER */
+
+        .user {
+            align-self: flex-end;
+
+            background: #ff6633;
+
+            color: white;
+
+            border-bottom-right-radius: 4px;
+        }
+
+
+        /* QUICK BUTTONS */
+
+        .quick-buttons {
+            display: flex;
+
+            gap: 8px;
+
+            overflow-x: auto;
+
+            padding: 5px 0 10px;
+        }
+
+        .quick-buttons button {
+
+            white-space: nowrap;
+
+            border: 1px solid #ff6633;
+
+            background: white;
+
+            color: #ff6633;
+
+            border-radius: 20px;
+
+            padding: 9px 14px;
+
+            font-size: 14px;
+
+            cursor: pointer;
+        }
+
+
+        /* TYPING */
+
+        .typing {
+            color: #777;
+
+            font-style: italic;
+        }
+
+
+        /* INPUT */
+
+        .input-area {
+
+            height: 65px;
+
+            min-height: 65px;
+
+            background: white;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+
+            padding: 8px;
+
+            box-shadow:
+                0 -2px 8px rgba(0,0,0,0.12);
+        }
+
+
+        #messageInput {
+
+            flex: 1;
+
+            height: 48px;
+
+            border: 1px solid #ddd;
+
+            border-radius: 25px;
+
+            padding: 0 17px;
+
+            font-size: 16px;
+
+            outline: none;
+        }
+
+
+        #messageInput:focus {
+            border-color: #ff6633;
+        }
+
+
+        #sendButton {
+
+            width: 48px;
+
+            height: 48px;
+
+            border: none;
+
+            border-radius: 50%;
+
+            background: #ff6633;
+
+            color: white;
+
+            font-size: 20px;
+
+            cursor: pointer;
+        }
+
+
+        #sendButton:disabled {
+            background: #aaa;
+        }
+
+
+        /* MOBILE */
+
+        @media (max-width: 600px) {
+
+            .header {
+                height: 60px;
+                min-height: 60px;
+                font-size: 21px;
+            }
+
+            .chat {
+                padding: 10px;
+            }
+
+            .message {
+                max-width: 90%;
+                font-size: 15px;
+            }
+
+            .input-area {
+                height: 65px;
+            }
+
+        }
+
+    </style>
+
 </head>
+
 
 <body>
 
-<div class="chat-container">
 
-    <div class="chat-header">
-        <h2>🍔 FoodieBot</h2>
-        <p>Online • Ready to take your order</p>
+<div class="app">
+
+
+    <!-- HEADER -->
+
+    <div class="header">
+
+        🍔 FoodieBot
+
     </div>
 
-    <div id="chat-box" class="chat-box">
+
+    <!-- CHAT -->
+
+    <div
+        id="chat"
+        class="chat">
+
+
+        <!-- WELCOME -->
 
         <div class="message bot">
-            <div class="bubble">
-                👋 Welcome to FoodieBot!<br>
-                What would you like to order?
-            </div>
+
+            🤖 <b>FoodieBot</b>
+
+            <br><br>
+
+            Welcome to FoodieBot! 👋🍔
+
+            <br><br>
+
+            I can help you with:
+
+            <br><br>
+
+            🍴 View menu
+            <br>
+
+            💰 Check prices
+            <br>
+
+            🛒 Add food to cart
+            <br>
+
+            🛒 View cart
+            <br>
+
+            📦 Place an order
+            <br>
+
+            🚚 Check order status
+
+            <br><br>
+
+            Try typing:
+
+            <b>menu</b>
+
         </div>
 
+
+        <!-- QUICK BUTTONS -->
+
+        <div class="quick-buttons">
+
+            <button onclick="quickMessage('menu')">
+                🍔 Menu
+            </button>
+
+            <button onclick="quickMessage('cart')">
+                🛒 Cart
+            </button>
+
+            <button onclick="quickMessage('How much is the burger?')">
+                💰 Price
+            </button>
+
+            <button onclick="quickMessage('order')">
+                📦 Order
+            </button>
+
+            <button onclick="quickMessage('help')">
+                ❓ Help
+            </button>
+
+        </div>
+
+
     </div>
+
+
+    <!-- INPUT -->
 
     <div class="input-area">
 
         <input
+            id="messageInput"
             type="text"
-            id="user-input"
             placeholder="Type your message..."
-        >
+            autocomplete="off">
 
-        <button id="send-button">
-            Send
+        <button id="sendButton">
+            ➤
         </button>
 
     </div>
 
+
 </div>
 
-<script src="script.js"></script>
+
+
+<script>
+
+
+/* =====================================================
+   AWS API GATEWAY URL
+   ===================================================== */
+
+const API_URL =
+    "https://hd4vj2xs60.execute-api.us-east-1.amazonaws.com/chat";
+
+
+
+/* =====================================================
+   USER ID
+   ===================================================== */
+
+let userId =
+    localStorage.getItem("foodieUserId");
+
+
+if (!userId) {
+
+    userId =
+        "user-" +
+        Math.random()
+            .toString(36)
+            .substring(2, 10);
+
+    localStorage.setItem(
+        "foodieUserId",
+        userId
+    );
+
+}
+
+
+
+/* =====================================================
+   ELEMENTS
+   ===================================================== */
+
+const chat =
+    document.getElementById("chat");
+
+const messageInput =
+    document.getElementById("messageInput");
+
+const sendButton =
+    document.getElementById("sendButton");
+
+
+
+/* =====================================================
+   SCROLL
+   ===================================================== */
+
+function scrollBottom() {
+
+    chat.scrollTop =
+        chat.scrollHeight;
+
+}
+
+
+
+/* =====================================================
+   ADD USER MESSAGE
+   ===================================================== */
+
+function addUserMessage(message) {
+
+    const div =
+        document.createElement("div");
+
+    div.className =
+        "message user";
+
+    div.textContent =
+        "👤 " + message;
+
+    chat.appendChild(div);
+
+    scrollBottom();
+
+}
+
+
+
+/* =====================================================
+   ADD BOT MESSAGE
+   ===================================================== */
+
+function addBotMessage(message) {
+
+    const div =
+        document.createElement("div");
+
+    div.className =
+        "message bot";
+
+    div.innerHTML =
+        "🤖 <b>FoodieBot</b><br><br>"
+        + message;
+
+    chat.appendChild(div);
+
+    scrollBottom();
+
+}
+
+
+
+/* =====================================================
+   SHOW TYPING
+   ===================================================== */
+
+function showTyping() {
+
+    hideTyping();
+
+    const div =
+        document.createElement("div");
+
+    div.id =
+        "typing";
+
+    div.className =
+        "message bot typing";
+
+    div.innerHTML =
+        "🤖 FoodieBot is typing...";
+
+    chat.appendChild(div);
+
+    scrollBottom();
+
+}
+
+
+
+/* =====================================================
+   HIDE TYPING
+   ===================================================== */
+
+function hideTyping() {
+
+    const typing =
+        document.getElementById("typing");
+
+    if (typing) {
+
+        typing.remove();
+
+    }
+
+}
+
+
+
+/* =====================================================
+   SEND MESSAGE TO AWS
+   ===================================================== */
+
+async function sendToAWS(message) {
+
+    showTyping();
+
+    sendButton.disabled =
+        true;
+
+
+    try {
+
+        const response =
+            await fetch(
+
+                API_URL,
+
+                {
+
+                    method: "POST",
+
+                    headers: {
+
+                        "Content-Type":
+                            "application/json"
+
+                    },
+
+                    body:
+                        JSON.stringify({
+
+                            command:
+                                message,
+
+                            userId:
+                                userId
+
+                        })
+
+                }
+
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "HTTP Error "
+                + response.status
+            );
+
+        }
+
+
+        const data =
+            await response.json();
+
+
+        hideTyping();
+
+
+        let botMessage =
+            "Sorry, I could not understand the response.";
+
+
+        /*
+         * Lambda response:
+         *
+         * {
+         *   "statusCode": 200,
+         *   "body": "{\"message\":\"...\"}"
+         * }
+         */
+
+
+        if (
+            data.body &&
+            typeof data.body === "string"
+        ) {
+
+            try {
+
+                const body =
+                    JSON.parse(data.body);
+
+
+                if (body.message) {
+
+                    botMessage =
+                        body.message;
+
+                }
+
+            }
+
+            catch (error) {
+
+                botMessage =
+                    data.body;
+
+            }
+
+        }
+
+
+        else if (data.message) {
+
+            botMessage =
+                data.message;
+
+        }
+
+
+        addBotMessage(
+            botMessage
+        );
+
+    }
+
+
+    catch (error) {
+
+        hideTyping();
+
+        console.error(
+            "FoodieBot Error:",
+            error
+        );
+
+
+        addBotMessage(
+
+            "❌ <b>Connection error</b>"
+            + "<br><br>"
+            + "I couldn't connect to "
+            + "the FoodieBot server."
+            + "<br><br>"
+            + "Please try again."
+
+        );
+
+    }
+
+
+    finally {
+
+        sendButton.disabled =
+            false;
+
+        messageInput.focus();
+
+    }
+
+}
+
+
+
+/* =====================================================
+   SEND MESSAGE
+   ===================================================== */
+
+function sendMessage() {
+
+    const message =
+        messageInput
+            .value
+            .trim();
+
+
+    if (!message) {
+
+        return;
+
+    }
+
+
+    addUserMessage(
+        message
+    );
+
+
+    messageInput.value =
+        "";
+
+
+    sendToAWS(
+        message
+    );
+
+}
+
+
+
+/* =====================================================
+   QUICK BUTTON
+   ===================================================== */
+
+function quickMessage(message) {
+
+    addUserMessage(
+        message
+    );
+
+
+    sendToAWS(
+        message
+    );
+
+}
+
+
+
+/* =====================================================
+   SEND BUTTON
+   ===================================================== */
+
+sendButton.addEventListener(
+
+    "click",
+
+    sendMessage
+
+);
+
+
+
+/* =====================================================
+   ENTER KEY
+   ===================================================== */
+
+messageInput.addEventListener(
+
+    "keydown",
+
+    function(event) {
+
+        if (
+            event.key === "Enter"
+        ) {
+
+            event.preventDefault();
+
+            sendMessage();
+
+        }
+
+    }
+
+);
+
+
+
+/* =====================================================
+   SERVICE WORKER
+   ===================================================== */
+
+if (
+    "serviceWorker"
+    in navigator
+) {
+
+    window.addEventListener(
+
+        "load",
+
+        function() {
+
+            navigator.serviceWorker
+                .register(
+                    "service-worker.js"
+                )
+
+                .then(
+
+                    function() {
+
+                        console.log(
+                            "FoodieBot PWA ready"
+                        );
+
+                    }
+
+                )
+
+                .catch(
+
+                    function(error) {
+
+                        console.log(
+                            "Service Worker Error:",
+                            error
+                        );
+
+                    }
+
+                );
+
+        }
+
+    );
+
+}
+
+
+</script>
+
 
 </body>
+
 </html>
