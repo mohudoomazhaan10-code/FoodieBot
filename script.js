@@ -6,6 +6,37 @@ const userInput = document.getElementById("user-input");
 const sendButton = document.getElementById("send-button");
 
 
+// =====================================================
+// UNIQUE USER ID
+// =====================================================
+
+let userId = localStorage.getItem("foodieUserId");
+
+if (!userId) {
+
+    if (crypto.randomUUID) {
+        userId = crypto.randomUUID();
+    } else {
+        userId =
+            "user-" +
+            Date.now() +
+            "-" +
+            Math.random()
+                .toString(36)
+                .substring(2, 10);
+    }
+
+    localStorage.setItem(
+        "foodieUserId",
+        userId
+    );
+}
+
+
+// =====================================================
+// ADD MESSAGE
+// =====================================================
+
 function addMessage(message, sender) {
 
     const messageDiv =
@@ -14,29 +45,36 @@ function addMessage(message, sender) {
     messageDiv.className =
         "message " + sender;
 
-
     const bubble =
         document.createElement("div");
 
-    bubble.className = "bubble";
+    bubble.className =
+        "bubble";
 
-    bubble.innerHTML = message;
+    bubble.innerHTML =
+        message;
 
+    messageDiv.appendChild(
+        bubble
+    );
 
-    messageDiv.appendChild(bubble);
-
-    chatBox.appendChild(messageDiv);
+    chatBox.appendChild(
+        messageDiv
+    );
 
     chatBox.scrollTop =
         chatBox.scrollHeight;
 }
 
 
+// =====================================================
+// SEND MESSAGE
+// =====================================================
+
 async function sendMessage() {
 
     const message =
         userInput.value.trim();
-
 
     if (message === "") {
         return;
@@ -69,7 +107,9 @@ async function sendMessage() {
 
                     command: message,
 
-                    userId: "demo-user"
+                    // IMPORTANT:
+                    // Send unique user ID
+                    userId: userId
 
                 })
 
@@ -86,13 +126,16 @@ async function sendMessage() {
         );
 
 
-        let result = data;
+        let result =
+            data;
 
 
         if (data.body) {
 
             result =
-                JSON.parse(data.body);
+                JSON.parse(
+                    data.body
+                );
 
         }
 
@@ -127,11 +170,19 @@ async function sendMessage() {
 }
 
 
+// =====================================================
+// BUTTON
+// =====================================================
+
 sendButton.addEventListener(
     "click",
     sendMessage
 );
 
+
+// =====================================================
+// ENTER KEY
+// =====================================================
 
 userInput.addEventListener(
     "keydown",
