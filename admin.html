@@ -26,18 +26,17 @@
         }
 
         .container {
-            padding: 20px;
-            max-width: 1000px;
+            max-width: 900px;
             margin: auto;
+            padding: 20px;
         }
 
-        .login-box,
-        .orders-box {
+        .box {
             background: white;
             padding: 20px;
             border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
         input {
@@ -47,6 +46,7 @@
             box-sizing: border-box;
             border: 1px solid #ccc;
             border-radius: 8px;
+            font-size: 16px;
         }
 
         button {
@@ -63,6 +63,15 @@
             opacity: 0.9;
         }
 
+        .hidden {
+            display: none;
+        }
+
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+
         .order {
             border: 1px solid #ddd;
             border-radius: 10px;
@@ -71,109 +80,139 @@
         }
 
         .order h3 {
-            margin-top: 0;
             color: #ff6b35;
+            margin-top: 0;
         }
 
         .status {
             font-weight: bold;
         }
 
-        .error {
-            color: red;
-            margin-top: 10px;
-        }
-
-        .hidden {
-            display: none;
+        .logout {
+            background: #555;
+            margin-left: 10px;
         }
     </style>
 </head>
 
 <body>
 
-    <header>
-        <h1>🍔 FoodieBot Admin</h1>
-        <p>Order Management Dashboard</p>
-    </header>
+<header>
 
-    <div class="container">
+    <h1>🍔 FoodieBot Admin</h1>
 
-        <!-- LOGIN -->
+    <p>Order Management</p>
 
-        <div class="login-box" id="loginBox">
-
-            <h2>🔐 Admin Login</h2>
-
-            <input
-                type="password"
-                id="adminPassword"
-                placeholder="Enter admin password"
-            >
-
-            <button onclick="login()">
-                Login
-            </button>
-
-            <div id="loginError" class="error"></div>
-
-        </div>
+</header>
 
 
-        <!-- ORDERS -->
+<div class="container">
 
-        <div class="orders-box hidden" id="ordersBox">
 
-            <h2>📦 Customer Orders</h2>
+    <!-- LOGIN -->
 
-            <button onclick="loadOrders()">
-                🔄 Refresh Orders
-            </button>
+    <div
+        class="box"
+        id="loginBox"
+    >
 
-            <div id="orders">
-                Loading orders...
-            </div>
+        <h2>🔐 Admin Login</h2>
 
-        </div>
+        <input
+            type="password"
+            id="adminPassword"
+            placeholder="Enter admin password"
+        >
+
+        <button onclick="login()">
+            Login
+        </button>
+
+        <div
+            id="loginError"
+            class="error"
+        ></div>
 
     </div>
 
 
+    <!-- ORDERS -->
+
+    <div
+        class="box hidden"
+        id="ordersBox"
+    >
+
+        <h2>📦 Customer Orders</h2>
+
+        <button onclick="loadOrders()">
+            🔄 Refresh Orders
+        </button>
+
+        <button
+            class="logout"
+            onclick="logout()"
+        >
+            Logout
+        </button>
+
+        <div id="orders">
+            No orders loaded.
+        </div>
+
+    </div>
+
+</div>
+
+
 <script>
+
 
 const API_URL =
     "https://hd4vj2xs60.execute-api.us-east-1.amazonaws.com/chat";
 
 
-// =====================================================
-// ADMIN PASSWORD
-// =====================================================
-
-// CHANGE THIS PASSWORD
-const ADMIN_PASSWORD =
-    "FoodieAdmin123";
+let adminPassword = "";
 
 
 // =====================================================
 // LOGIN
 // =====================================================
 
-function login() {
+async function login() {
 
     const password =
-        document.getElementById(
-            "adminPassword"
-        ).value;
+        document
+            .getElementById(
+                "adminPassword"
+            )
+            .value
+            .trim();
 
-    const error =
-        document.getElementById(
-            "loginError"
-        );
 
-    if (
-        password ===
-        ADMIN_PASSWORD
-    ) {
+    if (password === "") {
+
+        document
+            .getElementById(
+                "loginError"
+            )
+            .innerText =
+                "Please enter your password.";
+
+        return;
+
+    }
+
+
+    adminPassword =
+        password;
+
+
+    const success =
+        await checkAdmin();
+
+
+    if (success) {
 
         document
             .getElementById(
@@ -182,6 +221,7 @@ function login() {
             .classList
             .add("hidden");
 
+
         document
             .getElementById(
                 "ordersBox"
@@ -189,12 +229,108 @@ function login() {
             .classList
             .remove("hidden");
 
+
+        document
+            .getElementById(
+                "adminPassword"
+            )
+            .value = "";
+
+
         loadOrders();
 
-    } else {
+    }
 
-        error.innerText =
-            "❌ Incorrect password";
+}
+
+
+// =====================================================
+// CHECK ADMIN PASSWORD
+// =====================================================
+
+async function checkAdmin() {
+
+    try {
+
+        const response =
+            await fetch(
+                API_URL,
+                {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify({
+
+                            command:
+                                "admin orders",
+
+                            adminKey:
+                                adminPassword
+
+                        })
+
+                }
+            );
+
+
+        if (
+            response.status === 401
+        ) {
+
+            document
+                .getElementById(
+                    "loginError"
+                )
+                .innerText =
+                    "❌ Incorrect admin password.";
+
+            adminPassword = "";
+
+            return false;
+
+        }
+
+
+        if (!response.ok) {
+
+            document
+                .getElementById(
+                    "loginError"
+                )
+                .innerText =
+                    "❌ Unable to connect to server.";
+
+            adminPassword = "";
+
+            return false;
+
+        }
+
+
+        return true;
+
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+        document
+            .getElementById(
+                "loginError"
+            )
+            .innerText =
+                "❌ Server connection failed.";
+
+        adminPassword = "";
+
+        return false;
 
     }
 
@@ -208,12 +344,14 @@ function login() {
 async function loadOrders() {
 
     const ordersDiv =
-        document.getElementById(
-            "orders"
-        );
+        document
+            .getElementById(
+                "orders"
+            );
+
 
     ordersDiv.innerHTML =
-        "Loading orders...";
+        "⏳ Loading orders...";
 
 
     try {
@@ -222,6 +360,7 @@ async function loadOrders() {
             await fetch(
                 API_URL,
                 {
+
                     method: "POST",
 
                     headers: {
@@ -229,17 +368,30 @@ async function loadOrders() {
                             "application/json"
                     },
 
-                    body: JSON.stringify({
+                    body:
+                        JSON.stringify({
 
-                        command:
-                            "admin orders",
+                            command:
+                                "admin orders",
 
-                        adminKey:
-                            ADMIN_PASSWORD
+                            adminKey:
+                                adminPassword
 
-                    })
+                        })
+
                 }
             );
+
+
+        if (
+            response.status === 401
+        ) {
+
+            logout();
+
+            return;
+
+        }
 
 
         const data =
@@ -273,39 +425,46 @@ async function loadOrders() {
         }
 
 
-        ordersDiv.innerHTML = "";
+        ordersDiv.innerHTML =
+            "";
 
 
-        result.orders
-            .reverse()
-            .forEach(order => {
+        const orders =
+            [...result.orders]
+                .reverse();
+
+
+        orders.forEach(
+            function(order) {
 
                 const orderDiv =
                     document.createElement(
                         "div"
                     );
 
+
                 orderDiv.className =
                     "order";
 
 
-                let itemsText = "";
+                let itemsText =
+                    "";
 
 
                 if (
-                    order.Items &&
                     Array.isArray(
                         order.Items
                     )
                 ) {
 
-                    order.Items
-                        .forEach(item => {
+                    order.Items.forEach(
+                        function(item) {
 
                             itemsText +=
                                 `🍴 ${item.FoodName} × ${item.Quantity}<br>`;
 
-                        });
+                        }
+                    );
 
                 }
 
@@ -337,7 +496,7 @@ async function loadOrders() {
                     </p>
 
                     <p class="status">
-                        🚚 Status:
+                        🚚 <b>Status:</b>
                         ${order.OrderStatus}
                     </p>
 
@@ -348,15 +507,14 @@ async function loadOrders() {
                     orderDiv
                 );
 
-            });
+            }
+        );
 
     }
 
     catch (error) {
 
-        console.error(
-            error
-        );
+        console.error(error);
 
         ordersDiv.innerHTML =
             "<p class='error'>❌ Unable to load orders.</p>";
@@ -365,7 +523,45 @@ async function loadOrders() {
 
 }
 
+
+// =====================================================
+// LOGOUT
+// =====================================================
+
+function logout() {
+
+    adminPassword =
+        "";
+
+
+    document
+        .getElementById(
+            "ordersBox"
+        )
+        .classList
+        .add("hidden");
+
+
+    document
+        .getElementById(
+            "loginBox"
+        )
+        .classList
+        .remove("hidden");
+
+
+    document
+        .getElementById(
+            "orders"
+        )
+        .innerHTML =
+            "No orders loaded.";
+
+}
+
+
 </script>
 
 </body>
+
 </html>
